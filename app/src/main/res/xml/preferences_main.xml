@@ -90,6 +90,19 @@
         app:title="@string/setting_group_about"
         app:iconSpaceReserved="false">
 
+        <SwitchPreferenceCompat
+            app:key="setting_update_check"
+            app:title="@string/setting_update_check"
+            app:summary="@string/setting_update_check_summary"
+            app:defaultValue="true"
+            app:iconSpaceReserved="false"/>
+
+        <Preference
+            app:key="setting_welcome_restore"
+            app:title="@string/setting_welcome_restore"
+            app:summary="@string/setting_welcome_restore_summary"
+            app:iconSpaceReserved="false"/>
+
         <Preference
             app:key="setting_version"
             app:title="@string/setting_version"

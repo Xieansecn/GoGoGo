@@ -31,14 +31,16 @@ import java.util.ArrayList;
 
 public class WelcomeActivity extends AppCompatActivity {
     private static SharedPreferences preferences;
-    private static final String KEY_ACCEPT_AGREEMENT = "KEY_ACCEPT_AGREEMENT";
+    public static final String KEY_ACCEPT_AGREEMENT = "KEY_ACCEPT_AGREEMENT";
     private static final String KEY_ACCEPT_PRIVACY = "KEY_ACCEPT_PRIVACY";
+    public static final String KEY_SKIP_WELCOME = "KEY_SKIP_WELCOME";
 
     private static boolean isPermission = false;
     private static final int SDK_PERMISSION_REQUEST = 127;
     private static final ArrayList<String> ReqPermissions = new ArrayList<>();
 
     private CheckBox checkBox;
+    private CheckBox noShowCheckBox;
     private Boolean mAgreement;
     private Boolean mPrivacy;
 
@@ -46,13 +48,25 @@ public class WelcomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_welcome);
-
         // 生成默认参数的值（一定要尽可能早的调用，因为后续有些界面可能需要使用参数）
         PreferenceManager.setDefaultValues(this, R.xml.preferences_main, false);
 
+        preferences = getSharedPreferences(KEY_ACCEPT_AGREEMENT, MODE_PRIVATE);
+
+        // 用户已选择不再显示欢迎页时，直接进入主页面
+        if (preferences.getBoolean(KEY_SKIP_WELCOME, false)) {
+            gotoMain();
+            return;
+        }
+
+        setContentView(R.layout.activity_welcome);
+
         Button startBtn = findViewById(R.id.startButton);
         startBtn.setOnClickListener(v -> startMainActivity());
+
+        // 首次进入默认勾选，恢复欢迎页后为未勾选（恢复动作会写入 false）
+        noShowCheckBox = findViewById(R.id.check_no_show);
+        noShowCheckBox.setChecked(preferences.getBoolean(KEY_SKIP_WELCOME, true));
 
         checkAgreementAndPrivacy();
     }
@@ -138,12 +152,16 @@ public class WelcomeActivity extends AppCompatActivity {
         }
 
         if (isPermission) {
-            Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
-            startActivity(intent);
-            WelcomeActivity.this.finish();
+            preferences.edit().putBoolean(KEY_SKIP_WELCOME, noShowCheckBox.isChecked()).apply();
+            gotoMain();
         } else {
             checkDefaultPermissions();
         }
+    }
+
+    private void gotoMain() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
     private void doAcceptation() {
@@ -236,7 +254,6 @@ public class WelcomeActivity extends AppCompatActivity {
 
     @SuppressLint("ClickableViewAccessibility")
     private void checkAgreementAndPrivacy() {
-        preferences = getSharedPreferences(KEY_ACCEPT_AGREEMENT, MODE_PRIVATE);
         mPrivacy = preferences.getBoolean(KEY_ACCEPT_PRIVACY, false);
         mAgreement = preferences.getBoolean(KEY_ACCEPT_AGREEMENT, false);
 

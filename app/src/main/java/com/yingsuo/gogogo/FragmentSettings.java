@@ -1,5 +1,6 @@
 package com.yingsuo.gogogo;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.InputType;
 
@@ -85,6 +86,20 @@ public class FragmentSettings extends PreferenceFragmentCompat {
 
         EditTextPreference pfPosHisValid = findPreference("setting_history_expiration");
         setupDecimalEditTextPreference(pfPosHisValid);
+
+        // 恢复欢迎页：下次启动重新显示
+        Preference pfWelcomeRestore = findPreference("setting_welcome_restore");
+        if (pfWelcomeRestore != null) {
+            pfWelcomeRestore.setOnPreferenceClickListener(preference -> {
+                requireContext()
+                        .getSharedPreferences(WelcomeActivity.KEY_ACCEPT_AGREEMENT, Context.MODE_PRIVATE)
+                        .edit()
+                        .putBoolean(WelcomeActivity.KEY_SKIP_WELCOME, false)
+                        .apply();
+                GoUtils.DisplayToast(requireContext(), getResources().getString(R.string.setting_welcome_restore_done));
+                return true;
+            });
+        }
 
         // 设置版本号
         String verName;

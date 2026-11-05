@@ -211,7 +211,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
         initUpdateVersion();
 
-        checkUpdateVersion(false);
+        if (sharedPreferences.getBoolean("setting_update_check", true)) {
+            checkUpdateVersion(false);
+        }
     }
 
     @Override
